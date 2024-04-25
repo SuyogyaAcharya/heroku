@@ -3,18 +3,18 @@
     <title>Stock Clicker</title>
 </head>
 <body>
-    <div class="search-container">
-        <h1>Company Stock Info</h1>
+    <div>
+        <h1>Search for a Companies Stock!</h1>
         <form action="/" method="post">
-            <div class="form-group">
+            <div>
                 <input type="radio" id="typeTicker" name="searchType" value="ticker" checked>
-                <label for="typeTicker">Ticker Symbol</label>
+                <label for="typeTicker">Search by Ticker Symbol</label>
             </div>
             <div class="form-group">
                 <input type="radio" id="typeName" name="searchType" value="name">
-                <label for="typeName">Company Name</label>
+                <label for="typeName">Search by Company Name</label>
             </div>
-            <input type="text" id="searchQuery" name="searchQuery" placeholder="Enter ticker or name" required>
+            <input type="text" id="userQuery" name="userQuery" placeholder="Search by ticker or name" required>
             <button type="submit">Search</button>
         </form>
     </div>

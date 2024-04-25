@@ -1,12 +1,16 @@
+// Importing required modules
 const http = require('http');
 const fs = require('fs');
 const MongoClient = require('mongodb').MongoClient;
 const querystring = require('querystring');
 
+// MongoDB connection URL and database name
 const url = "mongodb+srv://sachar05:Suyogya123@firstcluster.pmva5oy.mongodb.net/?retryWrites=true&w=majority&appName=FirstCluster";
-const client = new MongoClient(url);
+const dbName = 'Stock';
+const collectionName = 'PublicCompanies';
 
-const server = http.createServer(async (req, res) => {
+// Create a HTTP server
+const server = http.createServer((req, res) => {
     if (req.method === 'GET') {
         // Serve the HTML form when accessed via HTTP GET
         fs.readFile('home.html', (err, data) => {
@@ -21,46 +25,60 @@ const server = http.createServer(async (req, res) => {
         });
     } else if (req.method === 'POST') {
         // Handle form submission when accessed via HTTP POST
-        let body = '';
+        let requestData = '';
         req.on('data', chunk => {
-            body += chunk.toString();
+            requestData += chunk.toString();
         });
-        req.on('end', async () => {
-            const postData = querystring.parse(body);
-            const searchType = postData.searchType;
-            const searchQuery = postData.searchQuery;
-            // Connect to MongoDB and perform search
-            try {
-                await client.connect();
-                const db = client.db('Stock');
-                const collection = db.collection('PublicCompanies');
-
-                let query = {};
-                if (searchType === 'ticker') {
-                    query = { ticker: searchQuery.toUpperCase() };
-                } else if (searchType === 'name') {
-                    query = { name: new RegExp(searchQuery, 'i') };
-                }
-
-                const results = await collection.find(query).toArray();
-                await client.close();
-                // Respond with search results
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.write('<html><body><h1>Search Results</h1>');
-                results.forEach(company => {
-                    res.write(`<p>Name: ${company.name}, Ticker: ${company.ticker}, Price: ${company.price}</p>`);
-                });
-                res.end('</body></html>');
-            } catch (error) {
-                res.writeHead(500);
-                res.end('Server error');
-                console.error('Database connection error:', error);
-            }
+        req.on('end', () => {
+            // Parse form data
+            const formData = querystring.parse(requestData);
+            // Call function to handle search
+            handleSearch(formData, res);
         });
     }
 });
 
-var port = process.env.PORT || 3000;
+// Function to handle search
+async function handleSearch(formData, res) {
+    const searchType = formData.searchType;
+    const userInput = formData.userQuery;
+
+    try {
+        // Connect to MongoDB
+        const client = await MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
+        const db = client.db(dbName);
+        const collection = db.collection(collectionName);
+
+        let searchQuery = {};
+        // Construct query based on search type
+        if (searchType === 'ticker') {
+            searchQuery = { ticker: userInput.toUpperCase() };
+        } else if (searchType === 'name') {
+            searchQuery = { name: new RegExp(userInput, 'i') }; 
+        }
+
+        // Perform search
+        const results = await collection.find(searchQuery).toArray();
+        // Close MongoDB connection
+        await client.close();
+        
+        // Respond with search results
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.write('<html><body><h1>Search Results</h1>');
+        results.forEach(stock => {
+            res.write(`<p>Name: ${stock.name}, Ticker: ${stock.ticker}, Price: ${stock.price}</p>`);
+        });
+        res.end('</body></html>');
+    } catch (error) {
+        // Handle errors
+        res.writeHead(500);
+        res.end('Server error');
+        console.error('Database connection error:', error);
+    }
+}
+
+// Server setup
+const port = process.env.PORT || 3000;
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
