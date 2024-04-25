@@ -60,7 +60,7 @@ const server = http.createServer(async (req, res) => {
     }
 });
 
-const port = 3000;
+var port = process.env.PORT || 3000;
 server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });

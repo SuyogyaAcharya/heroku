@@ -1,19 +1,23 @@
 {
-  "name": "helloapp",
+  "name": "suyogya-stock-ticcker",
   "version": "1.0.0",
   "description": "node app ",
-  "main": "hello_app.js",
+  "main": "process.js",
   "scripts": {
-  "start": "node hello_app.js"
-},
+    "start": "node process.js"
+  },
   "repository": {
-  "type": "git",
-  "url": ""
-},
+    "type": "git",
+    "url": ""
+  },
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongodb": "^6.5.0"
+  },
   "bugs": {
-  "url": ""
-},
-  "homepage": ""
+    "url": ""
+  },
+  "homepage": "",
 }
